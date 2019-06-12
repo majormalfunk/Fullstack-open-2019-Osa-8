@@ -4,12 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "watch": "cross-env NODE_ENV=development nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "apollo-server": "^2.6.3",
-    "graphql": "^14.3.1"
+    "cross-env": "^5.2.0",
+    "eslint": "^5.16.0",
+    "graphql": "^14.3.1",
+    "nodemon": "^1.19.1"
   }
 }
