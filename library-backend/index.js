@@ -97,6 +97,7 @@ const typeDefs = gql`
     name: String!
     born: Int
     bookCount: Int!
+    id: ID!
   }
 
   type Query {
@@ -125,20 +126,27 @@ const resolvers = {
   Author: {
     name: (root) => root.name,
     born: (root) => root.born,
-    bookCount: (root) => books.filter(b => b.author === root.name).length
+    bookCount: (root) => books.filter(b => b.author === root.name).length,
+    id: (root) => root.id
   },
   Query: {
     bookCount: () => books.length,
     allBooks: (root, args) => {
+      console.log('Query allBooks')
       return books.filter (b => (
         (b.author === args.author || args.author === undefined || args.author === null) &&
         (b.genres.includes(args.genre) || args.genre === undefined || args.genre === null)))
     },
     authorCount: () => authors.length,
-    allAuthors: () => authors,
+    allAuthors: () => {
+      console.log('Query allAuthors')
+      console.log(authors)
+      return authors
+    },
   },
   Mutation: {
     addBook: (root, args) => {
+      console.log('addBook args:', args)
       if (books.find(b => b.title === args.title && b.published === args.published && b.author === args.author)) {
         console.log('Book already exists:', args.title)
         throw new UserInputError('Book already exists', { invalidArgs: args})
