@@ -161,9 +161,10 @@ const resolvers = {
       return newBook//{ title: newBook.title, author: newBook.author }
     },
     editAuthor: (root, args) => {
+      console.log('Editing author', args.name, 'birthyear to', args.setBornTo)
       if (authors.find(a => a.name === args.name)) {
         authors = authors.map(a => a.name === args.name ? {...a, born: args.setBornTo} : a)
-        return { name: args.name, born: args.setBornTo }
+        return authors.find(a => a.name === args.name)
       } else {
         console.log('No such author:', args.name)
         return null

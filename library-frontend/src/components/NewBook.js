@@ -52,7 +52,7 @@ const NewBook = (props) => {
         <div>
           published
           <input
-            value={published}
+            value={isNaN(published) ? '' : published}
             onChange={({ target }) => setPublished(parseInt(target.value, 10))}
           />
         </div>
