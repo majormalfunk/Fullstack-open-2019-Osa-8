@@ -33,12 +33,18 @@ const Books = ({ show, result }) => {
             {books.map(a =>
               <tr key={a.title}>
                 <td>{a.title}</td>
-                <td>{a.author}</td>
+                <td>{a.author.name}</td>
                 <td>{a.published}</td>
               </tr>
             )}
           </tbody>
         </table>
+      </div>
+    )
+  } else {
+    return (
+      <div>
+        No books
       </div>
     )
   }

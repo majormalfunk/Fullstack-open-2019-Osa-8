@@ -12,7 +12,7 @@ const Authors = ({ show, result, editAuthor }) => {
 
   const updateAge = async (e) => {
     e.preventDefault()
-    
+
     console.log('Updating author', author.value, 'age to', born)
 
     let name = author.value
@@ -47,7 +47,7 @@ const Authors = ({ show, result, editAuthor }) => {
   if (result.data.allAuthors) {
 
     const authors = result.data.allAuthors
-    let authorNames = authors.map(a => { return { value: a.name, label: a.name }})
+    let authorNames = authors.map(a => { return { value: a.name, label: a.name } })
 
     return (
       <div>
@@ -87,6 +87,12 @@ const Authors = ({ show, result, editAuthor }) => {
           <button onClick={updateAge} type="button">Update author</button>
         </div>
       </div>
+    )
+  } else {
+    return (
+      <div>
+        No authors
+    </div>
     )
   }
 }
