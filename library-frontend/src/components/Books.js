@@ -28,13 +28,21 @@ const Books = ({ show, result }) => {
               </th>
               <th align="left">
                 Published
-            </th>
+              </th>
+              <th align="left">
+                Genres
+              </th>
             </tr>
-            {books.map(a =>
-              <tr key={a.title}>
-                <td>{a.title}</td>
-                <td>{a.author.name}</td>
-                <td>{a.published}</td>
+            {books.map(b =>
+              <tr key={b.title}>
+                <td>{b.title}</td>
+                <td>{b.author.name}</td>
+                <td>{b.published}</td>
+                <td>
+                  {b.genres.map((item) => { 
+                    return ( <i key={item}>[{item}] </i> )
+                  })}
+                </td>
               </tr>
             )}
           </tbody>

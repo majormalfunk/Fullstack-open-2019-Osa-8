@@ -118,17 +118,17 @@ const resolvers = {
       return Book.findById(newBook._id).populate('author')
     },
     // THIS NOT WORKING YET:
-    editAuthor: (root, args) => {
+    editAuthor: async (root, args) => {
       console.log('Editing author', args.name, 'birthyear to', args.setBornTo)
-      if (authors.find(a => a.name === args.name)) {
-        authors = authors.map(a => a.name === args.name ? { ...a, born: args.setBornTo } : a)
-        return authors.find(a => a.name === args.name)
+      const authorExists = await Author.findOne({ name: args.name })
+      if (authorExists) {
+        authorExists.born = args.setBornTo
+        return authorExists.save()
       } else {
         console.log('No such author:', args.name)
         return null
         //throw new UserInputError('No such author', { invalidArgs: args })
       }
-
     }
   }
 }
