@@ -60,7 +60,7 @@ const typeDefs = gql`
 
 const resolvers = {
   Author: {
-    bookCount: async (root) => { 
+    bookCount: async (root) => {
       const books = await Book.find({ author: root._id })
       return books.length
     }
@@ -105,15 +105,36 @@ const resolvers = {
         console.log('Existing author', authorId)
       } else {
         let newAuthor = new Author({ name: author })
-        await newAuthor.save()
+        try {
+          await newAuthor.save()
+        } catch (error) {
+          if (error.message.includes('name') && error.message.includes('is shorter')) {
+            throw new UserInputError('Author name is too short', {
+              invalidArgs: args
+            })
+          }
+          throw new UserInputError(error.message, {
+            invalidArgs: args
+          })
+        }
         authorId = newAuthor._id
         console.log('New author', authorId)
       }
       let newBook = new Book({
         title, published, author: authorId, genres
       })
-      await newBook.save()
-      //newBook.populate('author')
+      try {
+        await newBook.save()
+      } catch (error) {
+        if (error.message.includes('title') && error.message.includes('is shorter')) {
+          throw new UserInputError('Book title is too short', {
+            invalidArgs: args
+          })
+        }
+        throw new UserInputError(error.message, {
+          invalidArgs: args
+        })
+      }
       console.log('newBook', newBook)
       return Book.findById(newBook._id).populate('author')
     },
@@ -123,7 +144,13 @@ const resolvers = {
       const authorExists = await Author.findOne({ name: args.name })
       if (authorExists) {
         authorExists.born = args.setBornTo
-        return authorExists.save()
+        try {
+          return authorExists.save()
+        } catch (error) {
+          throw new UserInputError(error.message, {
+            invalidArgs: args
+          })
+        }
       } else {
         console.log('No such author:', args.name)
         return null

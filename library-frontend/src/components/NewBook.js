@@ -13,18 +13,21 @@ const NewBook = (props) => {
 
   const submit = async (e) => {
     e.preventDefault()
-    
+
     console.log('Adding book', title, 'by', author, 'published in', published)
 
-    await props.addBook({
-      variables: { title, author, published, genres }
-    })
-
-    setTitle('')
-    setAuthor('')
-    setPublished('')
-    setGenres([])
-    setGenre('')
+    try {
+      await props.addBook({
+        variables: { title, author, published, genres }
+      })
+      setTitle('')
+      setAuthor('')
+      setPublished('')
+      setGenres([])
+      setGenre('')
+    } catch (error) {
+      console.log(error.message)
+    }
   }
 
   const addGenre = () => {

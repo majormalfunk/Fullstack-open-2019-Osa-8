@@ -17,12 +17,16 @@ const Authors = ({ show, result, editAuthor }) => {
 
     let name = author.value
 
-    await editAuthor({
-      variables: { name, born }
-    })
+    try {
+      await editAuthor({
+        variables: { name, born }
+      })
 
-    setBorn('')
-    setAuthor('')
+      setBorn('')
+      setAuthor('')
+    } catch (error) {
+      console.log(error.message)
+    }
   }
 
   const handleAuthorChange = (selectedAuthor) => {
