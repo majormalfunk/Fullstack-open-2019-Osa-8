@@ -1,5 +1,5 @@
 require('dotenv').config()
-const { ApolloServer, UserInputError, gql } = require('apollo-server')
+const { ApolloServer, UserInputError, AuthenticationError, gql } = require('apollo-server')
 const mongoose = require('mongoose')
 const Book = require('./models/book')
 const Author = require('./models/author')
@@ -107,7 +107,7 @@ const resolvers = {
         filter.genres = { $in: [args.genre] }
       }
       const filteredBooks = await Book.find({ ...filter }).populate('author')
-      console.log('allBooks, filtered', filteredBooks)
+      // console.log('allBooks, filtered', filteredBooks)
       return filteredBooks
     },
     authorCount: () => Author.collection.countDocuments(),
@@ -124,7 +124,9 @@ const resolvers = {
 
       if (!currentUser) {
         console.log('User not authenticated while trying to add a book')
-        throw new AuthenticationError('You need to login to add books')
+        throw new AuthenticationError('You need to login to add books', {
+          invalidArgs: args
+        })
       }
 
       console.log('addBook args:', args)
@@ -170,12 +172,14 @@ const resolvers = {
       console.log('newBook', newBook)
       return Book.findById(newBook._id).populate('author')
     },
-    // THIS NOT WORKING YET:
+
     editAuthor: async (root, args, { currentUser }) => {
 
       if (!currentUser) {
         console.log('User not authenticated while trying to edit author')
-        throw new AuthenticationError('You need to login to add books')
+        throw new AuthenticationError('You need to login to edit author details', {
+          invalidArgs: args
+        })
       }
 
       console.log('Editing author', args.name, 'birthyear to', args.setBornTo)
@@ -210,7 +214,7 @@ const resolvers = {
       const user = await User.findOne({ username: args.username })
   
       if ( !user || args.password !== 'secret' ) {
-        throw new UserInputError("wrong credentials")
+        throw new UserInputError("Wrong credentials")
       }
   
       const userForToken = {

@@ -27,6 +27,7 @@ const NewBook = (props) => {
       setGenre('')
     } catch (error) {
       console.log(error.message)
+      props.handleError(error)
     }
   }
 

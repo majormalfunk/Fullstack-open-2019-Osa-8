@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Select from 'react-select';
 
-const Authors = ({ show, result, editAuthor }) => {
+const Authors = ({ show, result, editAuthor, handleError }) => {
 
   const [author, setAuthor] = useState('')
   const [born, setBorn] = useState('')
@@ -13,7 +13,7 @@ const Authors = ({ show, result, editAuthor }) => {
   const updateAge = async (e) => {
     e.preventDefault()
 
-    console.log('Updating author', author.value, 'age to', born)
+    console.log('Updating author', author.value, 'birth year to', born)
 
     let name = author.value
 
@@ -25,7 +25,7 @@ const Authors = ({ show, result, editAuthor }) => {
       setBorn('')
       setAuthor('')
     } catch (error) {
-      console.log(error.message)
+      handleError(error)
     }
   }
 

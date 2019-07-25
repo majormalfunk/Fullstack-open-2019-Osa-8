@@ -71,7 +71,7 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
 
   const handleError = (error) => {
-    setErrorMessage(error.graphQLErrors[0].message)
+    setErrorMessage(error.message.replace('GraphQL error:', ''))
     setTimeout(() => {
       setErrorMessage(null)
     }, 5000)
@@ -101,7 +101,7 @@ const App = () => {
       </div>
 
       <Authors result={authorResult} editAuthor={editAuthor}
-        show={page === 'authors'}
+        show={page === 'authors'} handleError={handleError}
       />
 
       <Books result={bookResult}
@@ -109,7 +109,7 @@ const App = () => {
       />
 
       <NewBook addBook={addBook}
-        show={page === 'add'}
+        show={page === 'add'} handleError={handleError}
       />
 
     </div>
