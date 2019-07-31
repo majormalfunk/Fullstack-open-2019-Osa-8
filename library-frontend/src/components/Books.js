@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import BookList from './BookList.js'
 
 const Books = ({ show, result }) => {
 
@@ -41,52 +42,8 @@ const Books = ({ show, result }) => {
     return (
       <div>
         <h2>Books in {selectedGenre === null ? 'all genres' : `genre ${selectedGenre}`}</h2>
-        <table>
-          <tbody>
-            <tr>
-              <th align="left">
-                Book
-              </th>
-              <th align="left">
-                Author
-              </th>
-              <th align="left">
-                Published
-              </th>
-              <th align="left">
-                Genres
-              </th>
-            </tr>
-            {books.map(book => {
-              let disp = (selectedGenre === null)
-              if (!disp) {
-                book.genres.forEach((genre) => {
-                  if (genre === selectedGenre) {
-                    disp = true
-                  }
-                })
-              }
-              if (disp) {
-                return (
-                  <tr key={book.title}>
-                    <td>{book.title}</td>
-                    <td>{book.author.name}</td>
-                    <td>{book.published}</td>
-                    <td>
-                      {book.genres.map((genre) => {
-                        return (<i key={genre}>[{genre}] </i>)
-                      })}
-                    </td>
-                  </tr>
-                )
-              } else {
-                return null
-              }
-            }
-            )}
-          </tbody>
-        </table>
-        <h3>Genres</h3>
+        <BookList books={books} selectedGenre={selectedGenre} />
+        <h3>Available genres</h3>
         <div>
           {Array.from(existingGenres).map((genre) => {
             return (<button key={genre} onClick={() => selectGenre(genre)}

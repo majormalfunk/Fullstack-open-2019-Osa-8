@@ -3,6 +3,7 @@ import { useQuery, useMutation, useApolloClient } from 'react-apollo-hooks'
 import { gql } from 'apollo-boost'
 import Authors from './components/Authors'
 import Books from './components/Books'
+import Recommendations from './components/Recommendations'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 
@@ -54,6 +55,17 @@ const ALL_BOOKS = gql`
   }
 }
 `
+
+const CURRENT_USER = gql`
+{
+  me {
+    username
+    favoriteGenre
+    id
+  }
+}
+`
+
 const CREATE_BOOK = gql`
 mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String]) {
   addBook (
@@ -107,6 +119,7 @@ const App = () => {
     onError: handleError,
     refetchQueries: [{ query: ALL_AUTHORS }]
   })
+  const userResult = useQuery(CURRENT_USER)
 
   return (
     <div>
@@ -114,6 +127,7 @@ const App = () => {
         <button onClick={() => setPage('authors')}>Authors</button>
         <button onClick={() => setPage('books')}>Books</button>
         {(token ? <button onClick={() => setPage('add')}>Add book</button> : null)}
+        {(token ? <button onClick={() => setPage('recommended')}>Recommended</button> : null)}
         {(token ? <button onClick={() => logout()}>Logout</button> : null)}
       </div>
 
@@ -122,7 +136,7 @@ const App = () => {
       </div>
 
       <LoginForm login={login} setToken={(token) => setToken(token)}
-        show={!token} handleError={handleError}  />
+        show={!token} handleError={handleError} />
 
       <Authors result={authorResult} editAuthor={editAuthor}
         show={page === 'authors'} handleError={handleError}
@@ -130,6 +144,10 @@ const App = () => {
 
       <Books result={bookResult}
         show={page === 'books'}
+      />
+
+      <Recommendations result={bookResult} userResult={userResult}
+        show={page === 'recommended'}
       />
 
       <NewBook addBook={addBook}

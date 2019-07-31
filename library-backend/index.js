@@ -97,7 +97,6 @@ const resolvers = {
   Query: {
     bookCount: () => Book.collection.countDocuments(),
     allBooks: async (root, args) => {
-      console.log('Query allBooks')
       let filter = {}
       if (args.author) {
         const author = await Author.findOne({ name: args.author })
@@ -112,7 +111,6 @@ const resolvers = {
     },
     authorCount: () => Author.collection.countDocuments(),
     allAuthors: () => {
-      console.log('Query allAuthors')
       return Author.find({})
     },
     me: (root, args, context) => {
