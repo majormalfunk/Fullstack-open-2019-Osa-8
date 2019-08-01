@@ -1,5 +1,5 @@
 require('dotenv').config()
-const { ApolloServer, UserInputError, AuthenticationError, gql } = require('apollo-server')
+const { ApolloServer, UserInputError, AuthenticationError, gql, PubSub } = require('apollo-server')
 const mongoose = require('mongoose')
 const Book = require('./models/book')
 const Author = require('./models/author')
@@ -22,6 +22,7 @@ mongoose.connect(DB_URL, { useNewUrlParser: true, useCreateIndex: true })
     console.log('Error connecting to', urlToLog, ':', error.message)
   })
 
+const pubsub = new PubSub()
 
 const typeDefs = gql`
   type Author {
@@ -76,6 +77,10 @@ const typeDefs = gql`
       username: String!
       password: String!
     ): Token
+  }
+
+  type Subscription {
+    bookAdded: Book!
   }
 
 `
@@ -168,7 +173,12 @@ const resolvers = {
         })
       }
       console.log('newBook', newBook)
-      return Book.findById(newBook._id).populate('author')
+
+      let book = Book.findById(newBook._id).populate('author')
+
+      pubsub.publish('BOOK_ADDED', { bookAdded: book })
+
+      return book
     },
 
     editAuthor: async (root, args, { currentUser }) => {
@@ -200,7 +210,7 @@ const resolvers = {
     },
     createUser: (root, args) => {
       const user = new User({ username: args.username, favoriteGenre: args.favoriteGenre })
-  
+
       return user.save()
         .catch(error => {
           throw new UserInputError(error.message, {
@@ -210,17 +220,22 @@ const resolvers = {
     },
     login: async (root, args) => {
       const user = await User.findOne({ username: args.username })
-  
-      if ( !user || args.password !== 'secret' ) {
+
+      if (!user || args.password !== 'secret') {
         throw new UserInputError("Wrong credentials")
       }
-  
+
       const userForToken = {
         username: user.username,
         id: user._id,
       }
-  
+
       return { value: jwt.sign(userForToken, JWT_SECRET) }
+    }
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
     }
   }
 }
@@ -240,6 +255,7 @@ const server = new ApolloServer({
   }
 })
 
-server.listen().then(({ url }) => {
-  console.log(`Server ready at ${url}`)
+server.listen().then(({ url, subscriptionsUrl }) => {
+  console.log(`Server ready @ ${url}`)
+  console.log(`Subscriptions ready @ ${subscriptionsUrl}`)
 })

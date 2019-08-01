@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useQuery, useMutation, useApolloClient } from 'react-apollo-hooks'
+import { useQuery, useMutation, useSubscription, useApolloClient } from 'react-apollo-hooks'
 import { gql } from 'apollo-boost'
 import Authors from './components/Authors'
 import Books from './components/Books'
@@ -8,41 +8,37 @@ import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 
 const LOGIN = gql`
-mutation login($username: String!, $password: String!) {
-  login(username: $username, password: $password) {
-    value
+  mutation login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      value
+    }
   }
-}
 `
-
 const ALL_AUTHORS = gql`
-{
-  allAuthors {
-    name
-    born
-    bookCount
-    id
+  {
+    allAuthors {
+      name
+      born
+      bookCount
+      id
+    }
   }
-}
 `
-
 const UPDATE_AUTHOR = gql`
-mutation updateAuthor($name: String!, $born: Int!) {
-  editAuthor (
-    name: $name,
-    setBornTo: $born
-  ) {
-    name
-    born
-    bookCount
-    id
+  mutation updateAuthor($name: String!, $born: Int!) {
+    editAuthor (
+      name: $name,
+      setBornTo: $born
+    ) {
+      name
+      born
+      bookCount
+      id
+    }
   }
-}
 `
-
-const ALL_BOOKS = gql`
-{
-  allBooks {
+const BOOK_DETAILS = gql`
+  fragment BookDetails on Book {
     title
     author {
       name
@@ -53,9 +49,16 @@ const ALL_BOOKS = gql`
     genres
     id
   }
-}
 `
 
+const ALL_BOOKS = gql`
+{
+  allBooks {
+    ...BookDetails
+  }
+}
+${BOOK_DETAILS}
+`
 const CURRENT_USER = gql`
 {
   me {
@@ -65,15 +68,14 @@ const CURRENT_USER = gql`
   }
 }
 `
-
 const CREATE_BOOK = gql`
-mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String]) {
-  addBook (
-    title: $title,
-    author: $author,
-    published: $published,
-    genres: $genres
-  ) {
+  mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String]) {
+    addBook (
+      title: $title,
+      author: $author,
+      published: $published,
+      genres: $genres
+    ) {
     title
     author {
       name
@@ -86,12 +88,42 @@ mutation createBook($title: String!, $author: String!, $published: Int!, $genres
   }
 }
 `
+const BOOK_ADDED = gql`
+  subscription {
+    bookAdded {
+      ...BookDetails  
+    }
+  }
+  ${BOOK_DETAILS}
+`
 
 const App = () => {
   const [token, setToken] = useState(null)
   const [page, setPage] = useState('authors')
   const [errorMessage, setErrorMessage] = useState(null)
   const client = useApolloClient()
+
+  const updateCacheWith = (addedBook) => {
+    const includedIn = (set, object) => {
+      set.map(b => b.id).includes(object.id)
+    }
+    const dataInStore = client.readQuery({ query: ALL_BOOKS })
+    if (!includedIn(dataInStore.allBooks, addedBook)) {
+      dataInStore.allBooks.push(addedBook)
+      client.writeQuery({
+        query: ALL_BOOKS,
+        data: dataInStore
+      })
+    }
+  }
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      const addedBook = subscriptionData.data.bookAdded
+      updateCacheWith(addedBook)
+      window.alert(`A new book "${addedBook.title}" by ${addedBook.author.name} was added else where!`)
+    }
+  })
 
   const handleError = (error) => {
     setErrorMessage(error.message.replace('GraphQL error:', ''))
@@ -112,7 +144,10 @@ const App = () => {
   const authorResult = useQuery(ALL_AUTHORS)
   const addBook = useMutation(CREATE_BOOK, {
     onError: handleError,
-    refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
+    update: (store, response) => {
+      updateCacheWith(response.data.addBook)
+    }
+    //refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
   })
   const bookResult = useQuery(ALL_BOOKS)
   const editAuthor = useMutation(UPDATE_AUTHOR, {

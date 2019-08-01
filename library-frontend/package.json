@@ -6,13 +6,15 @@
     "apollo-boost": "^0.4.3",
     "apollo-link": "^1.2.12",
     "apollo-link-context": "^1.0.18",
+    "apollo-link-ws": "^1.0.18",
     "graphql": "^14.4.2",
     "react": "^16.8.6",
     "react-apollo": "^2.5.8",
     "react-apollo-hooks": "^0.4.5",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.1",
-    "react-select": "^3.0.4"
+    "react-select": "^3.0.4",
+    "subscriptions-transport-ws": "^0.9.16"
   },
   "scripts": {
     "start": "react-scripts start",
